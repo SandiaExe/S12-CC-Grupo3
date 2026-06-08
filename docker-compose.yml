@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # --- CAPA 1: BASE DE DATOS ---
+  mi-base-datos:
+    image: cuenta_integrante1/mi-postgres-personalizado:latest
+    environment:
+      POSTGRES_DB: tareas_db
+    networks:
+      - red-aplicacion
+
+  # --- CAPA 2: BACKEND ---
+  mi-backend:
+    image: cuenta_integrante2/mi-api-python:latest
+    environment:
+      # ¡OJO AQUÍ! El backend se conecta usando el nombre del servicio de arriba como host
+      DB_HOST: mi-base-datos 
+    depends_on:
+      - mi-base-datos
+    networks:
+      - red-aplicacion
+
+  # --- CAPA 3: FRONTEND ---
+  mi-frontend:
+    image: cuenta_integrante3/mi-web-nginx:latest
+    ports:
+      - "80:80" # Este puerto se expone para que ustedes lo vean en su navegador (localhost)
+    environment:
+      # El frontend sabe dónde está el backend usando su nombre de servicio
+      API_URL: http://mi-backend:5000 
+    depends_on:
+      - mi-backend
+    networks:
+      - red-aplicacion
+
+networks:
+  red-aplicacion:
+    driver: bridge
