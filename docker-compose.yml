@@ -1,36 +1,36 @@
-version: '3.8'
-
 services:
-  # --- CAPA 1: BASE DE DATOS ---
+  # --- CAPA 1: BASE DE DATOS (Boris) ---
   mi-base-datos:
-    image: boris_usuario/todo-db:latest # Cambiar por el de Boris
+    image: borisestradas/todo-db:1.0  # 🌟 Corregido con la "s" oficial de su Docker Hub
     environment:
-      POSTGRES_DB: tareas_db
-      POSTGRES_USER: tu_usuario
-      POSTGRES_PASSWORD: tu_password
+      POSTGRES_DB: todolist
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5432:5432"
     networks:
       - red-aplicacion
 
-  # --- CAPA 2: BACKEND ---
+  # --- CAPA 2: BACKEND (Tu API) ---
   mi-backend:
-    image: cuenta_integrante2/mi-api-python:latest # Cambiar por el de tu compañero
+    image: cesarvillaa/todo-backend:1.0
     ports:
-      - "5000:5000" # 🌟 ¡OBLIGATORIO! Exponer el puerto para que el navegador del usuario pueda llegar al API
+      - "5000:5000"
     environment:
       DB_HOST: mi-base-datos 
-      DB_USER: tu_usuario
-      DB_PASSWORD: tu_password
-      DB_NAME: tareas_db
+      DB_USER: admin
+      DB_PASSWORD: admin123
+      DB_NAME: todolist
     depends_on:
       - mi-base-datos
     networks:
       - red-aplicacion
 
-  # --- CAPA 3: FRONTEND ---
+  # --- CAPA 3: FRONTEND (Ismael) ---
   mi-frontend:
-    image: sandiaexe/todo-frontend:latest # 🌟 
+    image: sandiaexe/todo-frontend:latest
     ports:
-      - "8080:80" # Mapeamos el puerto 80 interno de Nginx al 8080 de la máquina real
+      - "8080:80"
     depends_on:
       - mi-backend
     networks:
