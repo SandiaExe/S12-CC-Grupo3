@@ -3,87 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>To-Do List - Grupo 3</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 350px; }
-        h1 { text-align: center; color: #333; }
-        .input-area { display: flex; gap: 10px; margin-bottom: 20px; }
-        input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-        button { padding: 8px 12px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background-color: #218838; }
-        ul { list-style: none; padding: 0; }
-        li { padding: 10px; background: #eee; margin-bottom: 8px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
-        .delete-btn { background-color: #dc3545; padding: 4px 8px; font-size: 12px; }
-        .delete-btn:hover { background-color: #c82333; }
-    </style>
+    <title>TaskFlow Pro - Grupo 3</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between antialiased">
 
-<div class="container">
-    <h1>Lista de Tareas</h1>
-    <div class="input-area">
-        <input type="text" id="taskInput" placeholder="Nueva tarea...">
-        <button onclick="addTask()">Agregar</button>
-    </div>
-    <ul id="taskList"></ul>
-</div>
+    <header class="bg-slate-800/50 backdrop-blur-md border-b border-slate-700/50 py-4 px-6 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2.5">
+                <div class="bg-indigo-600 p-2 rounded-xl shadow-md shadow-indigo-900/30">
+                    <i data-lucide="layers" class="text-white w-5 h-5"></i>
+                </div>
+                <div>
+                    <span class="font-bold text-lg tracking-tight bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">TaskFlow Pro</span>
+                    <p class="text-[10px] text-slate-400 font-mono tracking-wider">MICROSERVICES ARCHITECTURE</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-xs bg-slate-800 text-slate-300 border border-slate-700 font-medium px-3 py-1 rounded-lg">
+                    S12 - Grupo 3
+                </span>
+            </div>
+        </div>
+    </header>
 
-<script>
-    // IMPORTANTE: Como el Frontend corre en el navegador del usuario, 
-    // se comunica con el Backend usando 'localhost' y el puerto que exponga el Backend.
-    const API_URL = 'http://localhost:5000/tasks';
+    <main class="flex-grow p-4 md:p-8 max-w-5xl w-full mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+        
+        <div class="bg-slate-800 border border-slate-700/60 rounded-2xl p-5 shadow-xl md:sticky md:top-24">
+            <div class="mb-4">
+                <h2 class="text-lg font-semibold flex items-center gap-2">
+                    <i data-lucide="plus-circle" class="w-5 h-5 text-indigo-400"></i>
+                    Nueva Tarea
+                </h2>
+                <p class="text-xs text-slate-400 mt-1">Añade elementos a la base de datos de forma asíncrona.</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1.5 font-mono">DESCRIPCIÓN</label>
+                    <input type="text" id="taskInput" placeholder="Ej. Estudiar para la PC2..." 
+                        class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm transition-all placeholder:text-slate-500"
+                        onkeypress="if(event.key === 'Enter') addTask()">
+                </div>
+                <button onclick="addTask()" class="w-full bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] text-white font-medium text-sm py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-indigo-950">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    <span>Registrar Tarea</span>
+                </button>
+            </div>
 
-    // Cargar tareas al iniciar
-    async function loadTasks() {
-        try {
-            const response = await fetch(API_URL);
-            const tasks = await response.json();
-            const list = document.getElementById('taskList');
-            list.innerHTML = '';
-            tasks.forEach(task => {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <span>${task.title}</span>
-                    <button class="delete-btn" onclick="deleteTask(${task.id})">X</button>
+            <div class="mt-6 pt-5 border-t border-slate-700/60 grid grid-cols-2 gap-4">
+                <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-700/30 text-center">
+                    <span class="text-[10px] font-mono text-slate-400 block mb-0.5">TOTAL</span>
+                    <span id="totalCount" class="text-xl font-bold text-indigo-400">0</span>
+                </div>
+                <div class="bg-slate-900/40 p-3 rounded-xl border border-slate-700/30 text-center">
+                    <span class="text-[10px] font-mono text-slate-400 block mb-0.5">ESTADO API</span>
+                    <span id="apiStatus" class="text-xs font-bold text-rose-400 flex items-center justify-center gap-1 mt-1">
+                        <span class="w-2 h-2 rounded-full bg-rose-500 inline-block animate-pulse"></span> Offline
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="md:col-span-2 bg-slate-800 border border-slate-700/60 rounded-2xl p-5 shadow-xl flex flex-col min-h-[400px]">
+            
+            <div class="flex flex-col sm:flex-row gap-3 justify-between items-center mb-5 pb-4 border-b border-slate-700/40">
+                <div class="relative w-full sm:max-w-xs">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
+                    <input type="text" id="searchInput" oninput="filterAndRenderTasks()" placeholder="Buscar tarea..." 
+                        class="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs transition-all">
+                </div>
+                
+                <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                    <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5 text-slate-400"></i>
+                    <select id="sortSelect" onchange="filterAndRenderTasks()" 
+                        class="bg-slate-900 border border-slate-700 text-xs rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-300 cursor-pointer">
+                        <option value="cronologico">Más recientes primero</option>
+                        <option value="alfabetico">Orden Alfabético (A-Z)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex-grow relative">
+                <div id="emptyState" class="hidden py-16 flex flex-col items-center justify-center text-center text-slate-500">
+                    <i data-lucide="search-code" class="w-12 h-12 stroke-1 mb-2 text-slate-600"></i>
+                    <p class="text-sm font-medium text-slate-400">No se encontraron registros</p>
+                    <p class="text-xs text-slate-500">Prueba cambiando el término de búsqueda o agrega uno nuevo.</p>
+                </div>
+
+                <ul id="taskList" class="space-y-2 max-h-[450px] overflow-y-auto pr-1">
+                    </ul>
+            </div>
+        </div>
+    </main>
+
+    <footer class="text-center py-4 text-xs text-slate-500 border-t border-slate-800 bg-slate-950/40 font-mono">
+        Distributed System &bull; Frontend Container &bull; USIL 2026
+    </footer>
+
+    <script>
+        const API_URL = 'http://localhost:5000/tasks';
+        let localTasksMemory = []; // Memoria caché local para búsquedas y filtros rápidos
+
+        function initIcons() {
+            if (window.lucide) lucide.createIcons();
+        }
+
+        // Obtener datos del Backend
+        async function loadTasks() {
+            try {
+                const response = await fetch(API_URL);
+                localTasksMemory = await response.json();
+                
+                // Actualizar indicador de estado de la API a ONLINE
+                const statusIndicator = document.getElementById('apiStatus');
+                statusIndicator.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-ping"></span> Online';
+                statusIndicator.className = "text-xs font-bold text-emerald-400 flex items-center justify-center gap-1 mt-1";
+
+                filterAndRenderTasks();
+            } catch (error) {
+                console.error("Error conectando al backend:", error);
+                
+                // Actualizar indicador de estado de la API a OFFLINE
+                const statusIndicator = document.getElementById('apiStatus');
+                statusIndicator.innerHTML = '<span class="w-2 h-2 rounded-full bg-rose-500 inline-block"></span> Offline';
+                statusIndicator.className = "text-xs font-bold text-rose-400 flex items-center justify-center gap-1 mt-1";
+
+                document.getElementById('taskList').innerHTML = `
+                    <div class="text-center text-xs text-rose-400 p-6 border border-rose-950/40 bg-rose-950/20 rounded-xl">
+                        <i data-lucide="database-zap" class="w-6 h-6 mx-auto mb-2 text-rose-500"></i>
+                        <span class="font-bold block mb-1">Error en la red de contenedores</span>
+                        El Frontend no logra comunicarse con el contenedor Backend (Puerto 5000).
+                    </div>
                 `;
-                list.appendChild(li);
-            });
-        } catch (error) {
-            console.error("Error cargando tareas:", error);
+                document.getElementById('totalCount').innerText = "0";
+                initIcons();
+            }
         }
-    }
 
-    // Agregar una nueva tarea
-    async function addTask() {
-        const input = document.getElementById('taskInput');
-        if (!input.value.trim()) return;
+        // Filtrar, Ordenar y Dibujar en pantalla
+        function filterAndRenderTasks() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const sortBy = document.getElementById('sortSelect').value;
+            const list = document.getElementById('taskList');
+            const emptyState = document.getElementById('emptyState');
 
-        try {
-            await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title: input.value })
-            });
-            input.value = '';
-            loadTasks();
-        } catch (error) {
-            console.error("Error agregando tarea:", error);
+            // 1. Filtrar por buscador
+            let processedTasks = localTasksMemory.filter(task => 
+                task.title.toLowerCase().includes(searchTerm)
+            );
+
+            // 2. Aplicar ordenamiento
+            if (sortBy === 'alfabetico') {
+                processedTasks.sort((a, b) => a.title.localeCompare(b.title));
+            } else if (sortBy === 'cronologico') {
+                processedTasks.sort((a, b) => b.id - a.id); // Asumiendo ID autoincremental
+            }
+
+            // 3. Renderizar
+            list.innerHTML = '';
+            document.getElementById('totalCount').innerText = localTasksMemory.length;
+
+            if (processedTasks.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                processedTasks.forEach(task => {
+                    const li = document.createElement('li');
+                    li.className = "flex items-center justify-between p-3.5 bg-slate-900/60 border border-slate-700/40 rounded-xl hover:border-slate-600 transition-all group";
+                    li.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
+                            <span class="text-sm font-medium text-slate-200">${task.title}</span>
+                        </div>
+                        <button onclick="deleteTask(${task.id})" class="text-slate-500 hover:text-rose-400 p-1 rounded-lg hover:bg-slate-800 transition-all cursor-pointer">
+                            <i data-lucide="trash-2" class="w-4.5 h-4.5"></i>
+                        </button>
+                    `;
+                    list.appendChild(li);
+                });
+            }
+            initIcons();
         }
-    }
 
-    // Eliminar una tarea
-    async function deleteTask(id) {
-        try {
-            await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-            loadTasks();
-        } catch (error) {
-            console.error("Error eliminando tarea:", error);
+        // Añadir elemento
+        async function addTask() {
+            const input = document.getElementById('taskInput');
+            if (!input.value.trim()) return;
+
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: input.value })
+                });
+                input.value = '';
+                loadTasks();
+            } catch (error) {
+                console.error("Error añadiendo elemento:", error);
+            }
         }
-    }
 
-    // Inicializar
-    loadTasks();
-</script>
+        // Eliminar elemento
+        async function deleteTask(id) {
+            try {
+                await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+                loadTasks();
+            } catch (error) {
+                console.error("Error eliminando elemento:", error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadTasks);
+    </script>
 </body>
 </html>
