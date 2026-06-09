@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # --- CAPA 1: BASE DE DATOS (Boris) ---
   mi-base-datos:
-    image: borisestrada/todo-db:1.0
+    image: borisestradas/todo-db:1.0
     environment:
       POSTGRES_DB: todolist
       POSTGRES_USER: admin
